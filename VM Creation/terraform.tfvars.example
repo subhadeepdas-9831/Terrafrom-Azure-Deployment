@@ -1,0 +1,18 @@
+resource_group_name              = "rg-terraform-demo"
+location                         = "eastus"
+environment                      = "dev"
+vm_name                          = "tfvmdemo"
+vm_size                          = "Standard_B2s"
+admin_username                   = "azureuser"
+admin_password                   = "StrongPassword123!"
+vnet_address_space               = "10.0.0.0/16"
+subnet_address_prefix            = "10.0.1.0/24"
+nsg_name                         = "tfvm-nsg"
+allow_ssh                        = true
+ssh_source_address_prefix        = "YOUR_PUBLIC_IP/32"
+additional_disk_count            = 2
+additional_disk_size_gb          = 32
+additional_disk_storage_account_type = "Standard_LRS"
+tags = {
+  Owner = "DevOps"
+}
