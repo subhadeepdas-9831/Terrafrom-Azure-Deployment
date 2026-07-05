@@ -1,10 +1,10 @@
 variable "name" {
-  description = "Resource group name"
+  description = "VM-Creation"
   type        = string
 }
 
 variable "location" {
-  description = "Azure region"
+  description = "East US"
   type        = string
 }
 
