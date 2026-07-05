@@ -108,16 +108,14 @@ resource "azurerm_linux_virtual_machine" "this" {
     version   = "latest"
   }
 
-  dynamic "storage_data_disk" {
-    for_each = var.additional_disk_count > 0 ? module.additional_disks[0].managed_disks : {}
-    content {
-      name              = storage_data_disk.value.name
-      managed_disk_id   = storage_data_disk.value.id
-      create_option     = "Attach"
-      lun               = tonumber(storage_data_disk.key)
-      caching           = "ReadWrite"
-    }
-  }
-
   tags = local.common_tags
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "this" {
+  for_each = var.additional_disk_count > 0 ? module.additional_disks[0].managed_disks : {}
+
+  managed_disk_id    = each.value.id
+  virtual_machine_id = azurerm_linux_virtual_machine.this.id
+  lun                = tonumber(each.key)
+  caching            = "ReadWrite"
 }

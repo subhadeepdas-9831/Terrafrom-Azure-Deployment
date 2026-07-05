@@ -33,7 +33,14 @@ jobs:
         run: az account show --output table
 
       - name: Terraform init
-        run: terraform init -input=false
+        env:
+          ARM_USE_AZUREAD: true
+        run: |
+          terraform init -input=false -reconfigure \
+            -backend-config="resource_group_name=${{ secrets.AZURE_TFSTATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=cloudshell05062026" \
+            -backend-config="container_name=stgterraformstatefile" \
+            -backend-config="key=terraform.tfstate"
 
       - name: Terraform validate
         run: terraform validate
