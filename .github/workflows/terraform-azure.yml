@@ -42,13 +42,6 @@ jobs:
           TFSTATE_STORAGE_ACCOUNT=cloudshell05062026
           TFSTATE_CONTAINER=stgterraformstatefile
 
-          az storage container create \
-            --account-name "$TFSTATE_STORAGE_ACCOUNT" \
-            --name "$TFSTATE_CONTAINER" \
-            --auth-mode login \
-            --public-access off \
-            --output none || true
-
           terraform init -input=false -reconfigure \
             -backend-config="resource_group_name=rg-terraform-state" \
             -backend-config="storage_account_name=$TFSTATE_STORAGE_ACCOUNT" \
