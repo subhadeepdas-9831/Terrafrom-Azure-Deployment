@@ -38,7 +38,7 @@ jobs:
         run: |
           terraform init -input=false -reconfigure \
             -backend-config="resource_group_name=rg-terraform-state" \
-            -backend-config="storage_account_name=cloudshell05062026" \
+            -backend-config="storage_account_name=cloudshell050620262" \
             -backend-config="container_name=stgterraformstatefile" \
             -backend-config="key=terraform.tfstate"
 
