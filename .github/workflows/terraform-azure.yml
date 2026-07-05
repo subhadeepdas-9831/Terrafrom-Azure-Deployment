@@ -10,6 +10,12 @@ permissions:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    env:
+      ARM_USE_CLI: false
+      ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).clientId }}
+      ARM_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIAL).clientSecret }}
+      ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).subscriptionId }}
+      ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).tenantId }}
 
     defaults:
       run:
@@ -33,11 +39,6 @@ jobs:
         run: az account show --output table
 
       - name: Terraform init
-        env:
-          ARM_USE_OIDC: true
-          ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).clientId }}
-          ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).subscriptionId }}
-          ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).tenantId }}
         run: |
           TFSTATE_STORAGE_ACCOUNT=cloudshell05062026
           TFSTATE_CONTAINER=stgterraformstatefile

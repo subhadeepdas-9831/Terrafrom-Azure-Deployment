@@ -10,6 +10,12 @@ permissions:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    env:
+      ARM_USE_OIDC: true
+      ARM_USE_CLI: false
+      ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).clientId }}
+      ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).subscriptionId }}
+      ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).tenantId }}
 
     defaults:
       run:
@@ -27,14 +33,11 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIAL }}
+          client-id: ${{ fromJSON(secrets.AZURE_CREDENTIAL).clientId }}
+          tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIAL).tenantId }}
+          subscription-id: ${{ fromJSON(secrets.AZURE_CREDENTIAL).subscriptionId }}
 
       - name: Terraform init
-        env:
-          ARM_USE_OIDC: true
-          ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).clientId }}
-          ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).subscriptionId }}
-          ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).tenantId }}
         run: |
           terraform init -input=false -reconfigure \
             -backend-config="resource_group_name=rg-terraform-state" \
