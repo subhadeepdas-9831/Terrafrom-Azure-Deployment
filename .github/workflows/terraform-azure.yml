@@ -32,32 +32,6 @@ jobs:
       - name: Verify Azure authentication
         run: az account show --output table
 
-      - name: Prepare Terraform backend storage access
-        env:
-          ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).clientId }}
-          ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).subscriptionId }}
-          ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).tenantId }}
-          AZURE_TFSTATE_RESOURCE_GROUP: ${{ secrets.AZURE_TFSTATE_RESOURCE_GROUP }}
-        run: |
-          if [ -z "$AZURE_TFSTATE_RESOURCE_GROUP" ]; then
-            echo "AZURE_TFSTATE_RESOURCE_GROUP is not set. Please add it to GitHub Secrets." >&2
-            exit 1
-          fi
-
-          az storage container create \
-            --account-name cloudshell05062026 \
-            --name stgterraformstatefile \
-            --auth-mode login \
-            --public-access off \
-            --output none
-
-          OBJECT_ID=$(az ad sp show --id "$ARM_CLIENT_ID" --query id -o tsv)
-          az role assignment create \
-            --assignee-object-id "$OBJECT_ID" \
-            --assignee-principal-type ServicePrincipal \
-            --role "Storage Blob Data Contributor" \
-            --scope "/subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$AZURE_TFSTATE_RESOURCE_GROUP/providers/Microsoft.Storage/storageAccounts/cloudshell05062026"
-
       - name: Terraform init
         env:
           ARM_USE_AZUREAD: true
@@ -67,8 +41,8 @@ jobs:
           ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).tenantId }}
         run: |
           terraform init -input=false -reconfigure \
-            -backend-config="resource_group_name=${{ secrets.AZURE_TFSTATE_RESOURCE_GROUP }}" \
-            -backend-config="storage_account_name=cloudshell05062026" \
+            -backend-config="resource_group_name=rg-terraform-state" \
+            -backend-config="storage_account_name=cloudshell050620262" \
             -backend-config="container_name=stgterraformstatefile" \
             -backend-config="key=terraform.tfstate"
 
