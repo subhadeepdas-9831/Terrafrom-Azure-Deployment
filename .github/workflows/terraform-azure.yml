@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   terraform:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     defaults:
       run:
@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -29,6 +29,9 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIAL }}
 
+      - name: Verify Azure authentication
+        run: az account show --output table
+
       - name: Terraform init
         run: terraform init -input=false
 
@@ -36,11 +39,11 @@ jobs:
         run: terraform validate
 
       - name: Terraform plan
-        run: terraform plan -input=false -var='admin_password=${{ secrets.VM_ADMIN_PASSWORD }}' -out=tfplan
         env:
           TF_VAR_admin_password: ${{ secrets.VM_ADMIN_PASSWORD }}
+        run: terraform plan -input=false -var="admin_password=$TF_VAR_admin_password" -out=tfplan
 
       - name: Terraform apply
-        run: terraform apply -input=false -auto-approve tfplan
         env:
           TF_VAR_admin_password: ${{ secrets.VM_ADMIN_PASSWORD }}
+        run: terraform apply -input=false -auto-approve tfplan
