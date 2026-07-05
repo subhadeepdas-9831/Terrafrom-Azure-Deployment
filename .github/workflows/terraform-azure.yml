@@ -40,7 +40,7 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).subscriptionId }}
           ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).tenantId }}
         run: |
-          TFSTATE_STORAGE_ACCOUNT=cloudshell05062026
+          TFSTATE_STORAGE_ACCOUNT=cloudshell050620262
           TFSTATE_CONTAINER=stgterraformstatefile
 
           TFSTATE_RESOURCE_GROUP=$(az storage account show \
