@@ -47,7 +47,7 @@ jobs:
 
       - name: Terraform plan
         env:
-          TF_VAR_resource_group_name: rg-terraform-demo
+          TF_VAR_resource_group_name: rg-terraform-test
           TF_VAR_location: eastus
           TF_VAR_environment: dev
         run: terraform plan -input=false -out=tfplan
