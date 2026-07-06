@@ -1,0 +1,73 @@
+name: Terraform Destroy Resources
+
+on:
+  workflow_dispatch:
+    inputs:
+      state_url:
+        description: Remote Terraform state URL
+        required: true
+        default: https://cloudshell050620262.blob.core.windows.net/stgterraformstatefile/terraform.tfstate
+      resource_group_name:
+        description: Resource group name to destroy
+        required: true
+        default: rg-terraform-test
+      location:
+        description: Azure location
+        required: true
+        default: eastus
+      environment:
+        description: Environment tag
+        required: true
+        default: dev
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-destroy:
+    runs-on: ubuntu-latest
+    env:
+      ARM_USE_OIDC: true
+      ARM_USE_CLI: false
+      ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).clientId }}
+      ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).subscriptionId }}
+      ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIAL).tenantId }}
+
+    defaults:
+      run:
+        working-directory: ./Create RG
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ fromJSON(secrets.AZURE_CREDENTIAL).clientId }}
+          tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIAL).tenantId }}
+          subscription-id: ${{ fromJSON(secrets.AZURE_CREDENTIAL).subscriptionId }}
+
+      - name: Initialize Terraform from remote state
+        env:
+          TF_STATE_URL: ${{ github.event.inputs.state_url }}
+        run: |
+          echo "Using Terraform state: $TF_STATE_URL"
+          terraform init -input=false -reconfigure \
+            -backend-config="resource_group_name=rg-terraform-state" \
+            -backend-config="storage_account_name=cloudshell050620262" \
+            -backend-config="container_name=stgterraformstatefile" \
+            -backend-config="key=terraform.tfstate"
+
+      - name: Terraform destroy
+        env:
+          TF_VAR_resource_group_name: ${{ github.event.inputs.resource_group_name }}
+          TF_VAR_location: ${{ github.event.inputs.location }}
+          TF_VAR_environment: ${{ github.event.inputs.environment }}
+        run: terraform destroy -input=false -auto-approve
