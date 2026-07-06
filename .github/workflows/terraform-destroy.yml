@@ -2,6 +2,8 @@ name: Terraform Destroy Resources
 
 on:
   workflow_dispatch:
+  branch run : main
+    
     inputs:
       state_url:
         description: Remote Terraform state URL
